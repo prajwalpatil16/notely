@@ -1,0 +1,7 @@
+<svg viewBox="0 0 80 90" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="5" width="80" height="80" rx="19" fill="#D9663B"/>
+  <path d="M 54.4 5 L 80 5 L 80 25.6 Z" fill="#F6F1EA"/>
+  <path d="M 54.4 5 L 80 25.6" stroke="#B9502C" stroke-width="1.2" fill="none" opacity="0.6"/>
+  <text x="40" y="61" font-family="Arial, Helvetica, sans-serif" font-weight="800"
+        font-size="43" fill="#FFFFFF" text-anchor="middle">N</text>
+</svg>
