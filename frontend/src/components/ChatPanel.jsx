@@ -69,12 +69,12 @@ export default function ChatPanel({ onSelectNote, onClose, prefilledQuery, onCle
       <div className="p-6 border-b border-[#E5E3DF]/80 flex justify-between items-center bg-[#F7F7F5]/50 select-none">
         <div>
           <h2 className="text-sm font-bold text-dark tracking-tight">AI Companion</h2>
-          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Chat with your knowledge canvas</p>
+          <p className="text-[12px] text-slate-400 font-semibold mt-0.5">Chat with your knowledge canvas</p>
         </div>
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleNewChat}
-            className="px-3 py-1.5 bg-primary text-white hover:bg-primary-dark rounded-lg transition-all font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1.5 bg-primary text-white hover:bg-primary-dark rounded-lg transition-all font-bold text-[12px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
           >
             <Icons.Sparkles className="w-3 h-3 text-white" /> New Chat
           </button>
@@ -96,7 +96,7 @@ export default function ChatPanel({ onSelectNote, onClose, prefilledQuery, onCle
       <div className="flex-1 flex flex-col overflow-hidden">
         {!selectedSessionId ? (
           <div className="flex-1 flex flex-col p-6 overflow-y-auto">
-            <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 select-none">Recent Chats</h3>
+            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 select-none">Recent Chats</h3>
             {isLoadingSessions ? (
               <div className="flex justify-center py-6">
                 <div className="w-5 h-5 border-2 border-slate-200 border-t-primary rounded-full animate-spin" />
@@ -110,7 +110,7 @@ export default function ChatPanel({ onSelectNote, onClose, prefilledQuery, onCle
                     className="p-3 border border-[#E5E3DF]/60 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                   >
                     <p className="font-semibold text-xs text-dark truncate mb-0.5">{session.title}</p>
-                    <p className="text-[9px] text-slate-400">
+                    <p className="text-[11px] text-slate-400">
                       {new Date(session.updated_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -118,7 +118,7 @@ export default function ChatPanel({ onSelectNote, onClose, prefilledQuery, onCle
                 {(!sessions || sessions.length === 0) && (
                   <div className="flex flex-col items-center justify-center py-12 opacity-65 gap-3 select-none">
                     <EmptyStateIllustration className="w-16 h-16 opacity-50" />
-                    <p className="text-[11px] font-semibold text-slate-400 text-center">Start a conversation by typing below!</p>
+                    <p className="text-[13px] font-semibold text-slate-400 text-center">Start a conversation by typing below!</p>
                   </div>
                 )}
               </div>
@@ -128,7 +128,7 @@ export default function ChatPanel({ onSelectNote, onClose, prefilledQuery, onCle
           <div className="flex-1 p-6 overflow-y-auto space-y-6 scrollbar-hide">
             <button
               onClick={() => setSelectedSessionId(null)}
-              className="text-[9px] font-black text-primary hover:text-primary-dark uppercase tracking-widest flex items-center gap-1 mb-4 cursor-pointer"
+              className="text-[11px] font-black text-primary hover:text-primary-dark uppercase tracking-widest flex items-center gap-1 mb-4 cursor-pointer"
             >
               ← Back to list
             </button>
@@ -160,7 +160,7 @@ export default function ChatPanel({ onSelectNote, onClose, prefilledQuery, onCle
                         <button
                           key={cite.id}
                           onClick={() => onSelectNote(cite)}
-                          className="text-[9px] px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-md hover:border-slate-400 font-medium transition-colors text-slate-500 hover:text-dark cursor-pointer flex items-center gap-1 max-w-[150px] truncate"
+                          className="text-[11px] px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-md hover:border-slate-400 font-medium transition-colors text-slate-500 hover:text-dark cursor-pointer flex items-center gap-1 max-w-[150px] truncate"
                           title={`Open ${cite.title}`}
                         >
                           <span>From:</span>

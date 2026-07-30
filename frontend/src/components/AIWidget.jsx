@@ -49,7 +49,7 @@ export default function AIWidget({ content, onApplyImprovement, onApplyTags }) {
 
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-60 bg-white border border-[#E5E3DF] rounded-2xl shadow-xl p-3.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <h4 className="text-slate-400 font-black text-[9px] uppercase tracking-widest mb-2.5 border-b border-slate-100 pb-2.5 pl-2 select-none">Magical Tools</h4>
+          <h4 className="text-slate-400 font-black text-[11px] uppercase tracking-widest mb-2.5 border-b border-slate-100 pb-2.5 pl-2 select-none">Magical Tools</h4>
           <div className="space-y-1">
             <button 
               onClick={handleSummarize}

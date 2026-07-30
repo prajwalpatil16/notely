@@ -104,7 +104,7 @@ export default function NoteEditor({ note, onSave, onCancel }) {
             {selectedTags.map(tag => (
               <span 
                 key={tag.id}
-                className="text-[10px] px-2 py-0.5 rounded bg-slate-100 hover:bg-[#F3D9C8]/40 text-slate-500 hover:text-primary border border-transparent hover:border-primary/10 flex items-center gap-1 transition-all"
+                className="text-[12px] px-2 py-0.5 rounded bg-slate-100 hover:bg-[#F3D9C8]/40 text-slate-500 hover:text-primary border border-transparent hover:border-primary/10 flex items-center gap-1 transition-all"
               >
                 {tag.name}
                 <button 
@@ -127,7 +127,7 @@ export default function NoteEditor({ note, onSave, onCancel }) {
                   handleAddTag(tagInput);
                 }
               }}
-              className="border-none focus:ring-0 text-[10px] font-semibold text-slate-400 hover:text-slate-600 w-16 p-0 bg-transparent placeholder-slate-300 transition-colors"
+              className="border-none focus:ring-0 text-[12px] font-semibold text-slate-400 hover:text-slate-600 w-16 p-0 bg-transparent placeholder-slate-300 transition-colors"
             />
           </div>
           
@@ -141,12 +141,12 @@ export default function NoteEditor({ note, onSave, onCancel }) {
         {/* AI Suggested Tags list */}
         {aiSuggestions.length > 0 && (
           <div className="p-3 bg-purple-50/20 border border-purple-100/50 rounded-xl space-y-2 mb-6 flex-shrink-0">
-            <p className="text-[9px] font-black text-purple-500 uppercase tracking-widest">AI Suggested:</p>
+            <p className="text-[11px] font-black text-purple-500 uppercase tracking-widest">AI Suggested:</p>
             <div className="flex flex-wrap gap-1.5">
               {aiSuggestions.map(name => (
                 <span 
                   key={name}
-                  className="text-[10px] bg-white text-purple-700 border border-purple-200/80 px-2 py-1 rounded-lg font-bold flex items-center gap-1.5"
+                  className="text-[12px] bg-white text-purple-700 border border-purple-200/80 px-2 py-1 rounded-lg font-bold flex items-center gap-1.5"
                 >
                   {name}
                   <div className="flex gap-0.5">
@@ -176,7 +176,7 @@ export default function NoteEditor({ note, onSave, onCancel }) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Start writing..."
-          className="flex-1 w-full text-sm sm:text-[15px] text-dark font-normal border-none focus:ring-0 resize-none placeholder-slate-300 leading-relaxed scrollbar-hide bg-transparent pb-16"
+          className="flex-1 w-full text-sm sm:text-[17px] text-dark font-normal border-none focus:ring-0 resize-none placeholder-slate-300 leading-relaxed scrollbar-hide bg-transparent pb-16"
         />
 
         {/* Sticky Save note footer */}

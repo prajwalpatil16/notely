@@ -199,7 +199,7 @@ export default function Dashboard() {
                   
                   {/* Popover Card */}
                   <div className="absolute right-0 mt-1.5 w-52 bg-white dark:bg-zinc-900 border border-border-subtle rounded-xl shadow-lg p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 select-none">
-                    <div className="px-3 py-1.5 text-[9px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-slate-50 dark:border-zinc-850 mb-1">
+                    <div className="px-3 py-1.5 text-[11px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-slate-50 dark:border-zinc-850 mb-1">
                       {selectedNote ? 'Note Actions' : 'Workspace Actions'}
                     </div>
 

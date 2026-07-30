@@ -227,10 +227,10 @@ export default function GraphView({ onSelectNote }) {
       <div className="flex justify-between items-center mb-4 select-none">
         <div>
           <h3 className="font-display font-black text-sm text-dark">Knowledge Map</h3>
-          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Visualize connections and themes</p>
+          <p className="text-[12px] text-slate-400 font-semibold mt-0.5">Visualize connections and themes</p>
         </div>
         {linkSourceId && (
-          <div className="px-3 py-1 bg-primary/10 border border-primary/20 text-[10px] text-primary font-black uppercase tracking-wider rounded-lg animate-pulse">
+          <div className="px-3 py-1 bg-primary/10 border border-primary/20 text-[12px] text-primary font-black uppercase tracking-wider rounded-lg animate-pulse">
             Connecting... click target note
           </div>
         )}
@@ -307,7 +307,7 @@ export default function GraphView({ onSelectNote }) {
                     <text 
                       dy="4" 
                       textAnchor="middle" 
-                      className={`text-[9px] font-black pointer-events-none select-none ${
+                      className={`text-[11px] font-black pointer-events-none select-none ${
                         isSelected ? 'fill-white' : 'fill-dark'
                       }`}
                     >
@@ -327,7 +327,7 @@ export default function GraphView({ onSelectNote }) {
             <div className="space-y-5">
               <div>
                 <h4 className="font-display font-black text-xs text-dark truncate">{selectedNode.title || "Untitled"}</h4>
-                <p className="text-[10px] text-slate-400 font-semibold mt-1.5 line-clamp-3 leading-relaxed">
+                <p className="text-[12px] text-slate-400 font-semibold mt-1.5 line-clamp-3 leading-relaxed">
                   {selectedNode.content || "Empty content..."}
                 </p>
               </div>
@@ -335,20 +335,20 @@ export default function GraphView({ onSelectNote }) {
               <div className="space-y-1.5">
                 <button
                   onClick={() => onSelectNote(selectedNode)}
-                  className="w-full text-[10px] font-black uppercase bg-slate-50 hover:bg-slate-100 text-dark py-2.5 rounded-lg transition-colors cursor-pointer"
+                  className="w-full text-[12px] font-black uppercase bg-slate-50 hover:bg-slate-100 text-dark py-2.5 rounded-lg transition-colors cursor-pointer"
                 >
                   Open Note
                 </button>
                 <button
                   onClick={startManualLink}
-                  className="w-full text-[10px] font-black uppercase bg-slate-50 hover:bg-slate-100 text-dark py-2.5 rounded-lg transition-colors cursor-pointer"
+                  className="w-full text-[12px] font-black uppercase bg-slate-50 hover:bg-slate-100 text-dark py-2.5 rounded-lg transition-colors cursor-pointer"
                 >
                   Draw Link
                 </button>
                 <button
                   onClick={fetchAISuggestions}
                   disabled={isAiLoading}
-                  className="w-full text-[10px] font-black uppercase bg-companion-soft text-companion hover:bg-companion/10 py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full text-[12px] font-black uppercase bg-companion-soft text-companion hover:bg-companion/10 py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Icons.Sparkles className="w-3.5 h-3.5" />
                   <span>{isAiLoading ? "Thinking..." : "AI Suggestions"}</span>
@@ -357,14 +357,14 @@ export default function GraphView({ onSelectNote }) {
 
               {suggestingForNoteId === selectedNodeId && aiSuggestions.length > 0 && (
                 <div className="space-y-2 border-t border-slate-100 pt-4 animate-in fade-in duration-200">
-                  <h5 className="text-[9px] font-black text-companion uppercase tracking-wider">Connect to:</h5>
+                  <h5 className="text-[11px] font-black text-companion uppercase tracking-wider">Connect to:</h5>
                   <div className="space-y-1.5">
                     {aiSuggestions.map(s => {
                       const match = notes?.find(n => n.id === s.note_id);
                       if (!match) return null;
                       return (
                         <div key={s.note_id} className="flex justify-between items-center gap-2 p-2 bg-slate-50/50 border border-slate-100/50 rounded-lg">
-                          <span className="text-[10px] font-bold text-dark truncate flex-1" title={s.reason}>{match.title}</span>
+                          <span className="text-[12px] font-bold text-dark truncate flex-1" title={s.reason}>{match.title}</span>
                           <button 
                             onClick={() => acceptAISuggestion(s.note_id)}
                             className="bg-green-500 hover:bg-green-600 text-white text-xs w-5 h-5 rounded-lg flex items-center justify-center font-bold cursor-pointer"
@@ -380,7 +380,7 @@ export default function GraphView({ onSelectNote }) {
               )}
             </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center text-[10px] font-bold text-slate-400/80 leading-relaxed italic px-2">
+            <div className="h-full flex flex-col items-center justify-center text-center text-[12px] font-bold text-slate-400/80 leading-relaxed italic px-2">
               <Icons.Map className="w-6 h-6 mb-2 text-slate-300" />
               <span>Select a node on the canvas to inspect relations or request recommendations.</span>
             </div>
