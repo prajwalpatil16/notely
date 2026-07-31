@@ -9,11 +9,18 @@ import {
   deleteNoteLink,
   summarizeNote, 
   suggestTags, 
-  improveContent 
+  improveContent,
+  exportNote,
+  exportAllNotes,
+  getNoteRevisions,
+  restoreNoteRevision,
+  shareNote,
+  revokeNoteShare
 } from "../api/notes";
 import { getFolders, createFolder, deleteFolder } from "../api/folders";
 import { getTags, createTag, deleteTag, attachTagsToNote } from "../api/tags";
-import { chatWithMessage, getRelatedSuggestions, getChatSessions, getSessionMessages } from "../api/ai";
+import { chatWithMessage, getRelatedSuggestions, getChatSessions, getSessionMessages, semanticSearch, generateDraft, extractActionItems, translateContent, brainstormIdeas, getAIQuota } from "../api/ai";
+import { useUIStore } from "../store/uiStore";
 
 // Notes Hooks
 export function useNotes(params = {}) {
@@ -25,20 +32,32 @@ export function useNotes(params = {}) {
 
 export function useCreateNote() {
   const qc = useQueryClient();
+  const addToast = useUIStore(state => state.addToast);
   return useMutation({
     mutationFn: createNote,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notes"] }),
+    onError: (err) => {
+      addToast(err.response?.data?.detail || err.response?.data?.message || "Failed to create note.", "error");
+    }
   });
 }
 
 export function useUpdateNote() {
   const qc = useQueryClient();
+  const addToast = useUIStore(state => state.addToast);
   return useMutation({
     mutationFn: ({ id, data }) => updateNote(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["notes"] });
       qc.invalidateQueries({ queryKey: ["note-links"] });
     },
+    onError: (err) => {
+      if (err.response?.status === 409) {
+        addToast("Conflict: This note has been modified by another session. Please reload or re-open it to get latest changes.", "error");
+      } else {
+        addToast(err.response?.data?.detail || err.response?.data?.message || "Failed to update note.", "error");
+      }
+    }
   });
 }
 
@@ -63,9 +82,13 @@ export function useFolders() {
 
 export function useCreateFolder() {
   const qc = useQueryClient();
+  const addToast = useUIStore(state => state.addToast);
   return useMutation({
     mutationFn: createFolder,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["folders"] }),
+    onError: (err) => {
+      addToast(err.response?.data?.detail || err.response?.data?.message || "Failed to create folder.", "error");
+    }
   });
 }
 
@@ -192,5 +215,161 @@ export function useRelatedSuggestions(noteId) {
     queryKey: ["related-suggestions", noteId],
     queryFn: () => getRelatedSuggestions(noteId).then((r) => r.data),
     enabled: !!noteId,
+  });
+}
+
+export function useExportNote() {
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: ({ id, format }) => exportNote(id, format).then((r) => r.data),
+    onSuccess: (data, variables) => {
+      const blob = new Blob([data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", variables.format === "json" ? `note_${variables.id}.json` : `note_${variables.id}.md`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      addToast("Note exported successfully!", "success");
+    },
+    onError: (err) => {
+      addToast("Export failed: " + err.message, "error");
+    }
+  });
+}
+
+export function useExportAllNotes() {
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: ({ format }) => exportAllNotes(format).then((r) => r.data),
+    onSuccess: (data, variables) => {
+      const blob = new Blob([data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", variables.format === "json" ? "notely_export.json" : "notely_export_markdown.zip");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      addToast("Bulk export successfully started!", "success");
+    },
+    onError: (err) => {
+      addToast("Bulk export failed: " + err.message, "error");
+    }
+  });
+}
+
+export function useNoteRevisions(noteId) {
+  return useQuery({
+    queryKey: ["note-revisions", noteId],
+    queryFn: () => getNoteRevisions(noteId).then((r) => r.data),
+    enabled: !!noteId,
+  });
+}
+
+export function useRestoreNoteRevision() {
+  const qc = useQueryClient();
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: ({ noteId, revisionId }) => restoreNoteRevision(noteId, revisionId).then((r) => r.data),
+    onSuccess: (data, variables) => {
+      qc.invalidateQueries({ queryKey: ["notes"] });
+      qc.invalidateQueries({ queryKey: ["note-revisions", variables.noteId] });
+      addToast("Version restored successfully!", "success");
+    },
+    onError: (err) => {
+      addToast("Failed to restore version: " + err.message, "error");
+    }
+  });
+}
+
+export function useShareNote() {
+  const qc = useQueryClient();
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: (id) => shareNote(id).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError: (err) => {
+      addToast("Failed to share note: " + err.message, "error");
+    }
+  });
+}
+
+export function useRevokeNoteShare() {
+  const qc = useQueryClient();
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: (id) => revokeNoteShare(id).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notes"] });
+    },
+    onError: (err) => {
+      addToast("Failed to revoke share link: " + err.message, "error");
+    }
+  });
+}
+
+// ─── New AI Hooks ──────────────────────────────────────────────────────────
+
+export function useSemanticSearch() {
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: ({ q, limit }) => semanticSearch(q, limit).then((r) => r.data),
+    onError: (err) => {
+      addToast(err.response?.data?.detail || "Semantic search failed.", "error");
+    }
+  });
+}
+
+export function useAIGenerateDraft() {
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: (prompt) => generateDraft(prompt).then((r) => r.data),
+    onError: (err) => {
+      addToast(err.response?.data?.detail || "Draft generation failed.", "error");
+    }
+  });
+}
+
+export function useAIExtractActions() {
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: (content) => extractActionItems(content).then((r) => r.data),
+    onError: (err) => {
+      addToast(err.response?.data?.detail || "Action extraction failed.", "error");
+    }
+  });
+}
+
+export function useAITranslate() {
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: ({ content, lang }) => translateContent(content, lang).then((r) => r.data),
+    onError: (err) => {
+      addToast(err.response?.data?.detail || "Translation failed.", "error");
+    }
+  });
+}
+
+export function useAIBrainstorm() {
+  const addToast = useUIStore(state => state.addToast);
+  return useMutation({
+    mutationFn: (content) => brainstormIdeas(content).then((r) => r.data),
+    onError: (err) => {
+      addToast(err.response?.data?.detail || "Brainstorm failed.", "error");
+    }
+  });
+}
+
+export function useAIQuota() {
+  return useQuery({
+    queryKey: ["ai-quota"],
+    queryFn: () => getAIQuota().then((r) => r.data),
+    staleTime: 30 * 1000, // refresh every 30s
   });
 }

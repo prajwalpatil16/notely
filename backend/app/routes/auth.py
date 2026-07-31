@@ -3,6 +3,7 @@ import sys
 from flask import Blueprint, request, jsonify, current_app
 from app.models import db, User
 from app import limiter
+from app.services.audit_service import log_action
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -80,6 +81,8 @@ def login():
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
 
+    log_action(user.id, "login")
+
     return jsonify({
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -143,6 +146,8 @@ def google_auth():
 
     access_token = create_access_token(identity=str(user.id))
     refresh_token = create_refresh_token(identity=str(user.id))
+
+    log_action(user.id, "login")
 
     return jsonify({
         "access_token": access_token,
@@ -229,7 +234,15 @@ def me():
         "email": current_user.email,
         "name": current_user.name,
         "is_active": current_user.is_active,
-        "avatar_url": current_user.avatar_url
+        "avatar_url": current_user.avatar_url,
+        "bio": current_user.bio,
+        "location": current_user.location,
+        "website": current_user.website,
+        "timezone": current_user.timezone or "UTC",
+        "language": current_user.language or "en",
+        "plan": current_user.plan,
+        "auth_provider": current_user.auth_provider,
+        "google_id": current_user.google_id
     }), 200
 
 @auth_bp.put("/me")
@@ -237,14 +250,51 @@ def me():
 def update_profile():
     data = request.get_json() or {}
     name = data.get("name")
+    email = data.get("email")
+    avatar_url = data.get("avatar_url")
     current_password = data.get("current_password")
     new_password = data.get("new_password")
+
+    profile_changed = False
 
     if name is not None:
         name_str = name.strip()
         if not name_str:
             return jsonify({"detail": "Name cannot be empty."}), 400
-        current_user.name = name_str
+        if current_user.name != name_str:
+            current_user.name = name_str
+            profile_changed = True
+
+    if email is not None:
+        if current_user.auth_provider == "google":
+            return jsonify({"detail": "Google accounts cannot change email address."}), 400
+        email_str = email.strip().lower()
+        if not email_str:
+            return jsonify({"detail": "Email cannot be empty."}), 400
+        if current_user.email != email_str:
+            existing = User.query.filter(User.email == email_str, User.id != current_user.id).first()
+            if existing:
+                return jsonify({"detail": "This email is already taken."}), 400
+            current_user.email = email_str
+            profile_changed = True
+
+    if avatar_url is not None:
+        if current_user.avatar_url != avatar_url:
+            current_user.avatar_url = avatar_url
+            profile_changed = True
+
+    # Extended profile fields
+    for field in ("bio", "location", "website", "timezone", "language"):
+        if field in data:
+            val = data[field]
+            if val is not None:
+                val = val.strip() if isinstance(val, str) else val
+            if getattr(current_user, field) != val:
+                setattr(current_user, field, val or None)
+                profile_changed = True
+
+    if profile_changed:
+        log_action(current_user.id, "profile_update")
 
     if new_password:
         if current_user.auth_provider == "google":
@@ -261,6 +311,7 @@ def update_profile():
             return jsonify({"detail": msg}), 400
             
         current_user.set_password(new_password)
+        log_action(current_user.id, "password_change")
 
     db.session.commit()
 
@@ -269,5 +320,34 @@ def update_profile():
         "email": current_user.email,
         "name": current_user.name,
         "is_active": current_user.is_active,
-        "avatar_url": current_user.avatar_url
+        "avatar_url": current_user.avatar_url,
+        "bio": current_user.bio,
+        "location": current_user.location,
+        "website": current_user.website,
+        "timezone": current_user.timezone or "UTC",
+        "language": current_user.language or "en",
+        "plan": current_user.plan,
+        "auth_provider": current_user.auth_provider,
+        "google_id": current_user.google_id
     }), 200
+
+
+@auth_bp.delete("/me")
+@jwt_required()
+@limiter.limit("3 per hour")
+def delete_account():
+    """Permanently delete the authenticated user and all their data (cascade on DB)."""
+    data = request.get_json() or {}
+    password = data.get("password", "")
+
+    # Google users don't have a password — accept deletion without password check
+    if current_user.auth_provider == "password":
+        if not password:
+            return jsonify({"detail": "Password is required to delete your account."}), 400
+        if not current_user.check_password(password):
+            return jsonify({"detail": "Incorrect password."}), 401
+
+    log_action(current_user.id, "account_delete", {"email": current_user.email})
+    db.session.delete(current_user)
+    db.session.commit()
+    return "", 204

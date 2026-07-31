@@ -13,37 +13,45 @@ export default function NoteCard({ note, onSelect, onDelete, index = 0 }) {
       className={`
         group cursor-pointer relative flex flex-col justify-between
         min-h-[200px] rounded-[20px] p-5
-        bg-white border border-[#E7DED3]
-        shadow-sm shadow-[#C8BEB2]/20
         transition-all duration-250
-        hover:shadow-md hover:shadow-[#C8BEB2]/30 hover:-translate-y-1 hover:border-[#D4C9BC]
+        hover:-translate-y-1
         ${rot} hover:rotate-0
       `}
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-subtle)',
+        boxShadow: '0 2px 8px rgba(200,190,178,0.2)',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(200,190,178,0.35)'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(200,190,178,0.2)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; }}
     >
       {/* Pinned accent stripe */}
       {note.is_pinned && (
-        <div className="absolute top-0 left-5 right-5 h-[3px] rounded-full bg-[#D97745]" />
+        <div className="absolute top-0 left-5 right-5 h-[3px] rounded-full" style={{ background: 'var(--accent)' }} />
       )}
-
-      {/* Rivet dot (top-right corner) */}
-      <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[#E7DED3] group-hover:bg-[#D4C9BC] transition-colors" />
+      {/* Rivet dot */}
+      <div className="absolute top-4 right-4 w-2 h-2 rounded-full" style={{ background: 'var(--border-subtle)' }} />
 
       {/* Content */}
       <div>
         <div className="flex items-start justify-between gap-3 pr-4">
-          <h3 className="font-black text-[#1F1F1F] text-[15px] tracking-tight leading-snug group-hover:text-[#D97745] transition-colors duration-200 line-clamp-2">
+          <h3 className="font-black text-[15px] tracking-tight leading-snug line-clamp-2 group-hover:transition-colors duration-200"
+            style={{ color: 'var(--text-primary)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-primary)'}
+          >
             {note.title || 'Untitled'}
           </h3>
           {note.is_pinned && <Icons.Pin className="w-3.5 h-3.5 text-[#D97745] flex-shrink-0 mt-0.5" />}
         </div>
 
-        <p className="text-[13px] text-[#7A7870] font-medium mt-3 line-clamp-4 leading-relaxed">
+        <p className="text-[13px] font-medium mt-3 line-clamp-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           {note.content || 'No content yet…'}
         </p>
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#F0EBE3]">
+      <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: '1px solid var(--bg-hover)' }}>
         {/* Tags */}
         <div className="flex gap-1.5 flex-wrap">
           {note.tags?.slice(0, 2).map((tag) => (

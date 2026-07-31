@@ -38,3 +38,39 @@ class Config:
     REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
     RATE_LIMIT_DEFAULT = os.environ.get("RATE_LIMIT_DEFAULT", "100/hour")
+
+    PLAN_LIMITS = {
+        "free": {
+            "max_folders": 5,
+            "max_notes": 50,
+            "max_storage_bytes": 50000
+        },
+        "pro": {
+            "max_folders": 999999,
+            "max_notes": 999999,
+            "max_storage_bytes": 500000000
+        },
+        "business": {
+            "max_folders": 999999,
+            "max_notes": 999999,
+            "max_storage_bytes": 500000000
+        },
+        "enterprise": {
+            "max_folders": 999999,
+            "max_notes": 999999,
+            "max_storage_bytes": 500000000
+        }
+    }
+
+    # AI daily action caps per plan (protects shared Gemini free-tier quota)
+    # Free: 20 actions/day. Paid plans: effectively unlimited (99999).
+    AI_DAILY_LIMITS = {
+        "free": 20,
+        "pro": 99999,
+        "business": 99999,
+        "enterprise": 99999
+    }
+
+    # Gemini model names — change here only, never inline
+    GEMINI_GENERATION_MODEL = os.environ.get("GEMINI_GENERATION_MODEL", "gemini-1.5-flash")
+    GEMINI_EMBEDDING_MODEL = os.environ.get("GEMINI_EMBEDDING_MODEL", "text-embedding-004")

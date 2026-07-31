@@ -221,4 +221,128 @@ class AIService:
         future = ai_executor.submit(task)
         return future.result()
 
+    def generate_draft(self, prompt: str) -> dict:
+        """Generate a full note draft (title + content) from a short topic prompt."""
+        def task():
+            if not self.client:
+                return {"title": prompt, "content": "AI service is not configured. Please add GEMINI_API_KEY."}
+            instruction = (
+                "You are a professional writing assistant inside a note-taking app. "
+                "Given the following topic or prompt, generate a well-structured note draft. "
+                "Return your response as JSON with exactly two keys: 'title' (a short title string) "
+                "and 'content' (the note body in plain text with markdown formatting). "
+                "Output ONLY the raw JSON object — no markdown fences, no extra text.\n\n"
+                f"Prompt: {prompt}"
+            )
+            try:
+                response = self.client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=instruction
+                )
+                text = (response.text or "{}").strip()
+                if "```json" in text:
+                    text = text.split("```json")[1].split("```")[0].strip()
+                elif "```" in text:
+                    text = text.split("```")[1].split("```")[0].strip()
+                import json
+                result = json.loads(text)
+                return {
+                    "title": str(result.get("title", prompt)),
+                    "content": str(result.get("content", ""))
+                }
+            except Exception as e:
+                return {"title": prompt, "content": f"Draft generation failed: {str(e)}"}
+
+        future = ai_executor.submit(task)
+        return future.result()
+
+    def extract_action_items(self, content: str) -> list:
+        """Extract a list of action-item strings from note content."""
+        def task():
+            if not self.client:
+                return []
+            prompt = (
+                "Extract all action items, tasks, and to-dos from the following note content. "
+                "Return ONLY a raw JSON array of short action-item strings (no markdown fences, no extra text). "
+                "Each item should be concise and actionable. If there are no action items, return [].\n\n"
+                f"Note content:\n{content}"
+            )
+            try:
+                response = self.client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=prompt
+                )
+                text = (response.text or "[]").strip()
+                if "```json" in text:
+                    text = text.split("```json")[1].split("```")[0].strip()
+                elif "```" in text:
+                    text = text.split("```")[1].split("```")[0].strip()
+                items = json.loads(text)
+                if isinstance(items, list):
+                    return [str(item) for item in items if item]
+                return []
+            except Exception as e:
+                print("extract_action_items error:", e)
+                return []
+
+        future = ai_executor.submit(task)
+        return future.result()
+
+    def translate_content(self, content: str, target_language: str) -> str:
+        """Translate note content to the target language (language name or code)."""
+        def task():
+            if not self.client:
+                return content
+            prompt = (
+                f"Translate the following text into {target_language}. "
+                "Preserve the original markdown formatting (headings, lists, bold, etc.). "
+                "Return ONLY the translated text — no preamble, no explanations.\n\n"
+                f"{content}"
+            )
+            try:
+                response = self.client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=prompt
+                )
+                return response.text or content
+            except Exception as e:
+                return content
+
+        future = ai_executor.submit(task)
+        return future.result()
+
+    def brainstorm_ideas(self, content: str) -> list:
+        """Return 3–5 short expansion idea strings based on note content."""
+        def task():
+            if not self.client:
+                return []
+            prompt = (
+                "Based on the following note content, generate 3 to 5 short creative ideas "
+                "to expand, deepen, or explore related directions. "
+                "Return ONLY a raw JSON array of concise idea strings (no markdown fences, no extra text). "
+                "Each idea should be one short sentence.\n\n"
+                f"Note content:\n{content}"
+            )
+            try:
+                response = self.client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=prompt
+                )
+                text = (response.text or "[]").strip()
+                if "```json" in text:
+                    text = text.split("```json")[1].split("```")[0].strip()
+                elif "```" in text:
+                    text = text.split("```")[1].split("```")[0].strip()
+                ideas = json.loads(text)
+                if isinstance(ideas, list):
+                    return [str(i) for i in ideas[:5] if i]
+                return []
+            except Exception as e:
+                print("brainstorm_ideas error:", e)
+                return []
+
+        future = ai_executor.submit(task)
+        return future.result()
+
+
 ai_service = AIService()

@@ -1,109 +1,144 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens ──────────────────────────────────────────────────────────
+   Single source of truth for both light and (future) dark mode.
+   Every app-shell component should reference these, never raw hex.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --bg-canvas: #FAF8F3;
-  --bg-sidebar: #F5F3EB;
-  --border-subtle: #E8E8E4;
-  --text-primary: #171717;
-  --text-secondary: #5B5B5B;
-  --accent: #D97745;
-  --accent-soft: #FDF4F0;
-  --accent-dark: #C25C2B;
-  --companion: #4D7C5A;
+  /* Canvas / surfaces */
+  --bg-canvas:      #FAF7F2;   /* warm paper — main app bg */
+  --bg-sidebar:     #F5F0E8;   /* slightly deeper warm paper */
+  --bg-card:        #FFFFFF;   /* note cards */
+  --bg-card-alt:    #FDFCF8;   /* editor, warm white */
+  --bg-hover:       #F0EBE3;   /* item hover */
+  --bg-hover-warm:  #FFF5EC;   /* orange-tinted hover (selected folder etc.) */
+
+  /* Borders */
+  --border-subtle:  #E7DED3;
+  --border-medium:  #D4C9BC;
+
+  /* Text */
+  --text-primary:   #1F1F1F;
+  --text-secondary: #7A7870;
+  --text-muted:     #B0A89A;
+  --text-faint:     #C8BEB2;
+
+  /* Brand */
+  --accent:         #D97745;
+  --accent-dark:    #C25C2B;
+  --accent-soft:    #FFF5EC;
+
+  /* Companion (AI / green) */
+  --companion:      #4D7C5A;
   --companion-soft: #EDF3EE;
+
+  /* Paper texture noise (shared across marketing + app) */
+  --paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
 }
 
-.dark {
-  --bg-canvas: #0E0D0B;
-  --bg-sidebar: #171614;
-  --border-subtle: #292826;
-  --text-primary: #FAF8F3;
-  --text-secondary: #999995;
-  --accent: #E0895C;
-  --accent-soft: #2E1B12;
-  --accent-dark: #F2A379;
-  --companion: #639A71;
-  --companion-soft: #1E2D22;
-}
-
+/* ─── Tailwind Theme Mapping ─────────────────────────────────────────────── */
 @theme {
-  --color-primary: var(--accent);
-  --color-primary-dark: var(--accent-dark);
-  --color-secondary: var(--text-secondary);
-  --color-background: var(--bg-canvas);
-  --color-surface: var(--bg-canvas);
-  --color-dark: var(--text-primary);
-  --color-cream: var(--bg-sidebar);
-  --color-border-subtle: var(--border-subtle);
-  --color-companion: var(--companion);
+  --color-primary:        var(--accent);
+  --color-primary-dark:   var(--accent-dark);
+  --color-primary-soft:   var(--accent-soft);
+  --color-secondary:      var(--text-secondary);
+  --color-background:     var(--bg-canvas);
+  --color-surface:        var(--bg-card);
+  --color-dark:           var(--text-primary);
+  --color-cream:          var(--bg-sidebar);
+  --color-border-subtle:  var(--border-subtle);
+  --color-companion:      var(--companion);
   --color-companion-soft: var(--companion-soft);
+  --color-muted:          var(--text-muted);
 
-  --font-sans: "Inter", sans-serif;
+  --font-sans:    "Inter", sans-serif;
   --font-display: "Outfit", sans-serif;
-
-  /* Scale sizes */
-  --text-xs: 0.9375rem;   /* 15px (was 13) */
-  --text-sm: 1rem;        /* 16px (was 14) */
-  --text-base: 1.0625rem; /* 17px (was 15) */
-  --text-lg: 1.125rem;    /* 18px (was 16) */
-  --text-xl: 1.375rem;    /* 22px (was 20) */
-  --text-2xl: 1.625rem;   /* 26px (was 24) */
+  --font-mono:    "JetBrains Mono", "Fira Code", "Menlo", monospace;
 }
 
+/* ─── Base ───────────────────────────────────────────────────────────────── */
 @layer base {
   body {
-    @apply bg-background text-dark font-sans antialiased selection:bg-primary/10 selection:text-primary transition-colors duration-200;
+    @apply bg-background text-dark font-sans antialiased selection:bg-primary/10 selection:text-primary;
+    background-color: var(--bg-canvas);
   }
 
   *:focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 }
 
+/* ─── Component classes ──────────────────────────────────────────────────── */
 @layer components {
-  /* Prominent new thought button */
+
+  /* Primary CTA button — matches website */
   .btn-primary {
-    @apply bg-primary text-white px-4 py-2.5 rounded-lg font-semibold text-sm tracking-wide hover:bg-primary-dark active:scale-[0.98] transition-all duration-200 cursor-pointer select-none flex items-center justify-center gap-2;
+    @apply flex items-center justify-center gap-2 bg-primary text-white font-bold rounded-2xl px-5 py-2.5
+      shadow-sm hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-md
+      active:scale-[0.98] transition-all duration-200 cursor-pointer select-none;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 25%, transparent);
   }
 
-  /* Quiet minimal search fields */
+  /* Quiet text inputs */
   .input-field {
-    @apply w-full bg-white dark:bg-zinc-800 border border-border-subtle rounded-lg px-3.5 py-2.5 focus:outline-none focus:border-primary transition-all font-medium text-slate-800 dark:text-zinc-100 text-sm placeholder:text-secondary/40;
+    @apply w-full bg-white border rounded-xl px-4 py-2.5 focus:outline-none transition-all duration-200
+      font-medium text-dark placeholder:text-muted text-sm;
+    border-color: var(--border-subtle);
+    &:focus { border-color: var(--accent); }
   }
 
-  /* Minimal card style: no shadow, hairline border */
+  /* Paper card */
   .card {
-    @apply bg-white dark:bg-zinc-900 border border-border-subtle rounded-xl p-5 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors duration-200;
+    @apply bg-white border rounded-2xl p-5 transition-all duration-200;
+    border-color: var(--border-subtle);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--border-medium) 30%, transparent);
+    &:hover { box-shadow: 0 4px 12px color-mix(in srgb, var(--border-medium) 40%, transparent); }
+  }
+
+  /* Section label — matches marketing typography exactly */
+  .section-label {
+    font-family: var(--font-mono);
+    @apply text-[11px] font-black uppercase tracking-[0.2em];
+    color: var(--text-muted);
+  }
+
+  /* Sidebar item hover row */
+  .sidebar-item {
+    @apply flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150;
+    &:hover { background: var(--bg-hover); }
+    &.active { background: var(--bg-hover-warm); color: var(--accent); }
   }
 }
 
-/* Custom utilities */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* ─── Paper texture utility ──────────────────────────────────────────────── */
+.paper-texture {
+  position: relative;
 }
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--paper-noise);
+  opacity: 0.03;
+  z-index: 0;
 }
 
-/* Glowing running connections for Graph nodes */
+/* ─── Scrollbar hide ─────────────────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── Graph edge animation ───────────────────────────────────────────────── */
 .edge-flow {
   stroke-dasharray: 8 6;
   animation: edgeFlowAnim 30s linear infinite;
 }
-
 @keyframes edgeFlowAnim {
-  0% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -300;
-  }
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -300; }
 }
-
 @keyframes dash {
-  to {
-    stroke-dashoffset: -1000;
-  }
+  to { stroke-dashoffset: -1000; }
 }

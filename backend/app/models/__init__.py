@@ -22,7 +22,16 @@ class User(db.Model):
     google_id = db.Column(db.String(255), unique=True, nullable=True)
     auth_provider = db.Column(db.String(20), default="password", nullable=False)
     avatar_url = db.Column(db.String(255), nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    location = db.Column(db.String(100), nullable=True)
+    website = db.Column(db.String(255), nullable=True)
+    timezone = db.Column(db.String(50), nullable=True, default="UTC")
+    language = db.Column(db.String(10), nullable=True, default="en")
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+    plan = db.Column(db.String(20), default="free", nullable=False)
+    # AI quota tracking — reset daily, enforced per-plan in quota_service.py
+    ai_usage_count = db.Column(db.Integer, default=0, nullable=False)
+    ai_usage_reset_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -75,6 +84,7 @@ class Note(db.Model):
     folder_id = db.Column(db.BigInteger, db.ForeignKey("folders.id", ondelete="SET NULL"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    version = db.Column(db.Integer, default=1, nullable=False)
 
     owner = db.relationship("User", back_populates="notes")
     folder = db.relationship("Folder", back_populates="notes")
@@ -121,3 +131,62 @@ class ChatMessage(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     session = db.relationship("ChatSession", back_populates="messages")
+
+class NoteRevision(db.Model):
+    __tablename__ = "note_revisions"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    note_id = db.Column(db.BigInteger, db.ForeignKey("notes.id", ondelete="CASCADE"), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    note = db.relationship("Note", backref=db.backref("revisions", cascade="all, delete-orphan", passive_deletes=True))
+
+class Template(db.Model):
+    __tablename__ = "templates"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    owner_id = db.Column(db.BigInteger, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=True)
+    category = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    owner = db.relationship("User", backref=db.backref("templates", cascade="all, delete-orphan", passive_deletes=True))
+
+class NoteShare(db.Model):
+    __tablename__ = "note_shares"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    note_id = db.Column(db.BigInteger, db.ForeignKey("notes.id", ondelete="CASCADE"), nullable=False)
+    owner_id = db.Column(db.BigInteger, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    share_token = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    revoked_at = db.Column(db.DateTime, nullable=True)
+
+    note = db.relationship("Note", backref=db.backref("shares", cascade="all, delete-orphan", passive_deletes=True))
+    owner = db.relationship("User", backref=db.backref("note_shares", cascade="all, delete-orphan", passive_deletes=True))
+
+class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    owner_id = db.Column(db.BigInteger, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    action = db.Column(db.String(50), nullable=False)
+    metadata_json = db.Column(db.JSON, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    owner = db.relationship("User", backref=db.backref("audit_logs", cascade="all, delete-orphan", passive_deletes=True))
+
+class NoteEmbedding(db.Model):
+    """Stores a Gemini text-embedding-004 vector per note for semantic search."""
+    __tablename__ = "note_embeddings"
+
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    note_id = db.Column(db.BigInteger, db.ForeignKey("notes.id", ondelete="CASCADE"), unique=True, nullable=False)
+    # Stored as a JSON array of floats (768-dim for text-embedding-004)
+    embedding = db.Column(db.JSON, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    note = db.relationship("Note", backref=db.backref("embedding", uselist=False, cascade="all, delete-orphan", passive_deletes=True))

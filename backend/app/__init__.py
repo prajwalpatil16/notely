@@ -53,12 +53,20 @@ def create_app(config_class=Config):
     from app.routes.folders import folders_bp
     from app.routes.tags import tags_bp
     from app.routes.ai import ai_bp
+    from app.routes.templates import templates_bp
+    from app.routes.public import public_bp
+    from app.routes.audit_logs import audit_logs_bp
+    from app.routes.integrations import integrations_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(notes_bp)
     app.register_blueprint(folders_bp)
     app.register_blueprint(tags_bp)
     app.register_blueprint(ai_bp)
+    app.register_blueprint(templates_bp)
+    app.register_blueprint(public_bp)
+    app.register_blueprint(audit_logs_bp)
+    app.register_blueprint(integrations_bp)
 
     # Health check
     @app.route("/health")

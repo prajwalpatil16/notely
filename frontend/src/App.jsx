@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Homepage from './pages/Homepage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import SharedNote from './pages/SharedNote';
 import ToastContainer from './components/ToastContainer';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -58,6 +59,8 @@ export default function App() {
           <Route path="/register" element={token ? <Navigate to="/dashboard" /> : <Register />} />
           <Route path="/forgot-password" element={token ? <Navigate to="/dashboard" /> : <ForgotPassword />} />
           <Route path="/reset-password" element={token ? <Navigate to="/dashboard" /> : <ResetPassword />} />
+          
+          <Route path="/shared/:token" element={<SharedNote />} />
           
           <Route path="/dashboard" element={
             <ProtectedRoute>

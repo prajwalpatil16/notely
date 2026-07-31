@@ -1,49 +1,68 @@
 import React from 'react';
+import { IconOwl, IconSprout, IconNotebook } from './CompanyIllustrations';
 
-export default function EmptyStateIllustration({ className = "w-48 h-48" }) {
+/**
+ * EmptyStateIllustration — now uses the same mascot family as the marketing
+ * site (owl/sprout/notebook) so first-run moments feel like they're part of
+ * the same Notely world the user saw on the landing page.
+ */
+export default function EmptyStateIllustration({ 
+  className = "w-40 h-40",
+  variant = "notes"   // "notes" | "chat" | "folders"
+}) {
+  if (variant === "chat") {
+    return (
+      <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
+        <div className="relative">
+          <div className="w-20 h-20 rounded-[22px] bg-[#EDF3EE] border border-[#4D7C5A]/20 flex items-center justify-center rotate-[-4deg]">
+            <IconOwl className="w-12 h-12" />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#D97745] border-2 border-[#FAF7F2] flex items-center justify-center">
+            <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+        </div>
+        <div className="text-center">
+          <p className="text-[14px] font-black text-[#1F1F1F] tracking-tight">Ask Notely AI</p>
+          <p className="text-[12px] text-[#B0A89A] font-medium mt-0.5">Ask questions about your notes</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "folders") {
+    return (
+      <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
+        <div className="w-16 h-16 rounded-[18px] bg-[#FFF5EC] border border-[#D97745]/20 flex items-center justify-center rotate-[3deg]">
+          <IconNotebook className="w-9 h-9" />
+        </div>
+        <div className="text-center">
+          <p className="text-[13px] font-black text-[#1F1F1F]">No folders yet</p>
+          <p className="text-[11px] text-[#B0A89A] font-medium mt-0.5">Organize your notes into workspaces.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Default: notes
   return (
-    <svg 
-      className={className} 
-      viewBox="0 0 200 200" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Soft background glow */}
-      <circle cx="100" cy="100" r="80" fill="#F3D9C8" fillOpacity="0.4" />
-      
-      {/* Base shadow */}
-      <path d="M40 145 C 70 155, 130 155, 160 145" stroke="#2B2622" strokeWidth="4" strokeLinecap="round" />
-
-      {/* Book Cover */}
-      <rect x="42" y="55" width="116" height="82" rx="8" fill="#D9663B" stroke="#2B2622" strokeWidth="4" />
-      
-      {/* Book Spine */}
-      <line x1="100" y1="55" x2="100" y2="137" stroke="#2B2622" strokeWidth="4" />
-
-      {/* Pages */}
-      <path d="M48 61 H 98 V 131 H 48 Z" fill="#FFFFFF" stroke="#2B2622" strokeWidth="3" />
-      <path d="M102 61 H 152 V 131 H 102 Z" fill="#FFFFFF" stroke="#2B2622" strokeWidth="3" />
-
-      {/* Left Page Lines */}
-      <line x1="56" y1="75" x2="90" y2="75" stroke="#8C7C72" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="56" y1="89" x2="90" y2="89" stroke="#8C7C72" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="56" y1="103" x2="80" y2="103" stroke="#8C7C72" strokeWidth="2.5" strokeLinecap="round" />
-
-      {/* Right Page Lines */}
-      <line x1="110" y1="75" x2="144" y2="75" stroke="#8C7C72" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="110" y1="89" x2="144" y2="89" stroke="#8C7C72" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="110" y1="103" x2="130" y2="103" stroke="#8C7C72" strokeWidth="2.5" strokeLinecap="round" />
-
-      {/* Pencil */}
-      <g transform="translate(132, 90) rotate(-35)">
-        <rect x="0" y="0" width="12" height="48" rx="2" fill="#F3D9C8" stroke="#2B2622" strokeWidth="3" />
-        <rect x="3" y="10" width="6" height="28" fill="#D9663B" />
-        
-        {/* Tip */}
-        <path d="M 0 0 L 6 -12 L 12 0 Z" fill="#FAF7F2" stroke="#2B2622" strokeWidth="3" />
-        {/* Lead */}
-        <path d="M 4 -8 L 6 -12 L 8 -8 Z" fill="#2B2622" />
-      </g>
-    </svg>
+    <div className={`flex flex-col items-center justify-center gap-4 ${className}`}>
+      <div className="relative">
+        <div className="w-24 h-24 rounded-[24px] bg-[#FFF5EC] border border-[#D97745]/20 flex items-center justify-center rotate-[-3deg] shadow-sm">
+          <IconSprout className="w-14 h-14" />
+        </div>
+        {/* Tiny star doodle */}
+        <svg className="absolute -top-2 -right-2 w-5 h-5 text-[#D97745]" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" opacity="0.6"/>
+        </svg>
+      </div>
+      <div className="text-center">
+        <p className="text-[16px] font-black text-[#1F1F1F] tracking-tight">Knowledge begins here</p>
+        <p className="text-[13px] text-[#7A7870] font-medium mt-1 leading-relaxed max-w-[180px]">
+          Start capturing ideas, meeting notes, and everything in between.
+        </p>
+      </div>
+    </div>
   );
 }
