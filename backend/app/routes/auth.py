@@ -47,11 +47,21 @@ def register():
     db.session.add(user)
     db.session.commit()
 
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    log_action(user.id, "register")
+
     return jsonify({
-        "id": user.id,
-        "email": user.email,
-        "name": user.name,
-        "is_active": user.is_active
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "avatar_url": user.avatar_url
+        }
     }), 201
 
 @auth_bp.post("/login")
